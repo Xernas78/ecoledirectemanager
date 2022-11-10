@@ -49,7 +49,7 @@ class EcoleDirecteManager:
         res = conn.getresponse()
         data = json.loads(res.read())
         self.data = data
-        if not 'code' in data:
+        if 'code' in data == 200:
             self.accountData = data['data']['accounts'][0]
             self.token = data['token']
             self.studentId = data['data']['accounts'][0]['id']
@@ -57,9 +57,10 @@ class EcoleDirecteManager:
             print("ECOLE DIRECTE MANAGER - " + self.accountData['prenom'])
             self.ProcessNotes()
             self.ProcessMoyennes()
+            self.login()
             return data
         else:
-            print(data['message'] + ", error " + str(data['code']))
+            print("désolé, une erreur a surgi lors de la connexion : " + data['message'] + ", error " + str(data['code']))
             return
 
 
