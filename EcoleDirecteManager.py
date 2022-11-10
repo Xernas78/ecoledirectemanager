@@ -45,14 +45,23 @@ class EcoleDirecteManager:
         res = conn.getresponse()
         data = json.loads(res.read())
         self.data = data
-        self.accountData = data['data']['accounts'][0]
-        self.token = data['token']
-        self.studentId = data['data']['accounts'][0]['id']
-        print("La connexion a fonctionnée !")
-        print("ECOLE DIRECTE MANAGER - " + self.accountData['prenom'])
-        self.ProcessNotes()
-        self.ProcessMoyennes()
-        return data
+        conn.request("POST", "/v3/login.awp", payload, headers)
+        res = conn.getresponse()
+        data = json.loads(res.read())
+        self.data = data
+        if not 'code' in data:
+            self.accountData = data['data']['accounts'][0]
+            self.token = data['token']
+            self.studentId = data['data']['accounts'][0]['id']
+            print("La connexion a fonctionnée !")
+            print("ECOLE DIRECTE MANAGER - " + self.accountData['prenom'])
+            self.ProcessNotes()
+            self.ProcessMoyennes()
+            return data
+        else:
+            print(data['message'] + ", error " + str(data['code']))
+            return
+
 
     def GetBrutNotes(self):
         conn = http.client.HTTPSConnection("api.ecoledirecte.com")
@@ -192,6 +201,9 @@ class EcoleDirecteManager:
         self.hi_geClasseAverage = sum(hi_geClassNotes) / len(hi_geClassNotes)
         self.a_plaAverage = sum(a_plaNotes) / len(a_plaNotes)
         self.a_plaClasseAverage = sum(a_plaClassNotes) / len(a_plaClassNotes)
-
+        
         self.totalAverage = (self.francaisAverage + self.mathsAverage + self.anglaisAverage + self.espagnol_allemandAverage + self.svtAverage + self.ph_chAverage + self.hi_geAverage + self.a_plaAverage) / 8
         self.totalClassAverage = (self.francaisClasseAverage + self.mathsClasseAverage + self.anglaisClasseAverage + self.espagnol_allemandClasseAverage + self.svtClasseAverage + self.ph_chClasseAverage + self.hi_geClasseAverage + self.a_plaClasseAverage) / 8
+        
+        print("Voici votre moyenne : " + str(manager.totalAverage))
+        print("Voici la moyenne de la classe : " + str(manager.totalClassAverage))
